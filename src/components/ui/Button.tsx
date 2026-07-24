@@ -10,7 +10,7 @@ type ButtonProps = {
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
   icon?: React.ReactNode;
-  className?: string; // ✅ Add support
+  className?: string;
 };
 
 export function Button({
@@ -22,7 +22,7 @@ export function Button({
   disabled = false,
   type = 'button',
   icon,
-  className = '', // ✅ Add default value
+  className = '',
 }: ButtonProps) {
   const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium focus:outline-none transition-colors';
   const variantStyles = {
@@ -46,14 +46,16 @@ export function Button({
       disabled={disabled}
       whileTap={{ scale: disabled ? 1 : 0.97 }}
       whileHover={{ scale: disabled ? 1 : 1.03 }}
-      className={`
-        ${baseStyles}
-        ${variantStyles[variant]}
-        ${sizeStyles[size]}
-        ${widthStyle}
-        ${disabledStyle}
-        ${className}  // ✅ Append user-defined className
-      `}
+      className={[
+        baseStyles,
+        variantStyles[variant],
+        sizeStyles[size],
+        widthStyle,
+        disabledStyle,
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       {icon && <span className="mr-2">{icon}</span>}
       {children}

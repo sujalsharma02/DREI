@@ -1,12 +1,45 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FilterIcon, SlidersIcon, SearchIcon } from 'lucide-react';
+import { FilterIcon, SlidersIcon, SearchIcon, Loader2Icon } from 'lucide-react';
+import axios from 'axios';
 import { PropertyCard } from '../components/ui/PropertyCard';
-import { properties } from '../utils/mockData';
+import { Property } from '../utils/types';
 import { Button } from '../components/ui/Button';
 
+type ApiProperty = {
+  id: string;
+  name: string;
+  location: string;
+  price: number;
+  image: string;
+  annualYield: number;
+  tokenPrice: number;
+  totalTokens: number;
+  tokensSold: number;
+  status: Property['status'];
+};
+
+const toProperty = (p: ApiProperty): Property => ({
+  id: p.id,
+  title: p.name,
+  description: '',
+  imageUrl: p.image,
+  location: p.location,
+  price: p.price,
+  tokenPrice: p.tokenPrice,
+  totalTokens: p.totalTokens,
+  tokensSold: p.tokensSold,
+  status: p.status,
+  features: [],
+  documents: [],
+  returnRate: p.annualYield
+});
+
 export default function Browse() {
-  const [filteredProperties, setFilteredProperties] = useState(properties);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -16,7 +49,25 @@ export default function Browse() {
     location: 'all'
   });
 
-  // ✅ Fix undefined issue here
+  const fetchProperties = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await axios.get<{ properties: ApiProperty[] }>('/api/properties');
+      const loaded = data.properties.map(toProperty);
+      setProperties(loaded);
+      setFilteredProperties(loaded);
+    } catch {
+      setError('Failed to load properties. Make sure the API server is running.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
+
   const locations = Array.from(
     new Set(
       properties
@@ -197,7 +248,20 @@ export default function Browse() {
           )}
 
           {/* Property List */}
-          {filteredProperties.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-24 text-gray-400">
+              <Loader2Icon size={40} className="animate-spin mb-4 text-indigo-500" />
+              <p>Loading properties...</p>
+            </div>
+          ) : error ? (
+            <div className="bg-gray-800 rounded-lg p-12 text-center">
+              <h3 className="text-xl font-semibold text-white mb-2">Something went wrong</h3>
+              <p className="text-gray-400 mb-6">{error}</p>
+              <Button variant="outline" onClick={fetchProperties}>
+                Try Again
+              </Button>
+            </div>
+          ) : filteredProperties.length === 0 ? (
             <div className="bg-gray-800 rounded-lg p-12 text-center">
               <h3 className="text-xl font-semibold text-white mb-2">No properties found</h3>
               <p className="text-gray-400 mb-6">Try adjusting your search criteria</p>

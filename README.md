@@ -1,166 +1,54 @@
-# Developer Home Assessment
+# DREI — Tokenized Real Estate Platform
 
-Thank you for your interest in joining our team.
+Full-stack assessment submission (**Option 3: Full-Stack Developer**).
 
-Please complete the task that best matches your area of expertise. The objective of this assessment is to evaluate your technical skills, code quality, and ability to work within an existing project.
+A React + Vite frontend backed by a lightweight Express API. The Browse page fetches property listings from the backend and renders them as responsive investment cards.
 
-## Submission Requirements
+## What Was Implemented
 
-* Complete the selected task(s).
-* Record a short demonstration video (3–5 minutes).
-* Submit your source code and video.
+### Backend (`server/`)
 
----
-
-# Option 1: Frontend Developer
-
-**Estimated Time:** 30–60 Minutes
-
-## Objective
-
-Implement a new feature or improve an existing component within the provided project.
-
-## Requirements
-
-Choose one of the following:
-
-### A. Wallet Integration
-
-* Connect MetaMask wallet.
-* Display connected wallet address.
-* Handle account and network changes.
-
-### B. Component Enhancement
-
-* Add a loading state to an existing button component.
-* Show a loading spinner.
-* Disable the button while loading.
-* Preserve existing functionality and styling.
-
-## Deliverables
-
-* Source code
-* Demo video showing the implementation
-
----
-
-# Option 2: Web3 Developer
-
-**Estimated Time:** 45–60 Minutes
-
-## Objective
-
-Integrate blockchain functionality into the provided project.
-
-## Requirements
-
-1. Connect to any deployed smart contract.
-2. Create a service or API that reads data from the contract.
-3. Display the result through:
-
-   * API response
-   * Console output
-   * Simple UI (optional)
-
-### Bonus
-
-* Wallet integration
-* Contract write function
-* Testnet deployment
-
-## Deliverables
-
-* Source code
-* Deployment details (if applicable)
-* Demo video
-
----
-
-# Option 3: Full-Stack Developer
-
-**Estimated Time:** 45–60 Minutes
-
-## Objective
-
-Build a simple end-to-end feature.
-
-## Requirements
-
-### Backend
-
-Create an API endpoint:
-
-```http
-GET /api/properties
-```
-
-Return mock property data including:
-
-* ID
-* Name
-* Location
-* Price
-* Image
-* Annual Yield
+- `GET /api/properties` — returns mock property data: ID, Name, Location, Price, Image, Annual Yield (plus token sale fields used by the UI)
+- `GET /api/properties/:id` — returns a single property, 404 if not found
+- JSON 404 fallback for unknown `/api` routes
 
 ### Frontend
 
-Display the data in responsive cards showing:
+- `src/pages/Browse.tsx` fetches from `GET /api/properties` (via the Vite dev proxy) with loading spinner, error state with retry, and search/filter support
+- `src/components/ui/PropertyCard.tsx` — responsive card showing property image, name, location, price, annual yield (APY), and an **Invest Now** button (disabled when sold out)
 
-* Property Image
-* Property Name
-* Location
-* Price
-* Annual Yield
-* Invest Now Button
+### Cleanup
 
-## Deliverables
+Removed unused boilerplate that was not referenced anywhere:
 
-* Backend implementation
-* Frontend implementation
-* Demo video
+- Legacy MERN server (`server/` controllers, models, and routes for users/posts/profile/chat), old root `server.js`
+- Unused Netlify serverless functions (`netlify/`)
+- Unused dependencies (mongoose, bcryptjs, jsonwebtoken, gravatar, etc.)
+- Unused static assets
 
----
+## Getting Started
 
-# Option 4: Mobile Developer
+```bash
+npm install
+npm run dev
+```
 
-**Estimated Time:** 30–60 Minutes
+`npm run dev` starts both:
 
-## Objective
+- API server on <http://localhost:5025>
+- Vite dev server on <http://localhost:3000> (proxies `/api` to the API server)
 
-Create a mobile version of an existing page from the project.
+Or run them separately with `npm run server` and `npm run client`.
 
-## Requirements
+## Project Structure
 
-Use one of the following:
-
-* Flutter
-* React Native
-* Kotlin
-
-The implementation should:
-
-* Be responsive on mobile devices
-* Provide a clean user experience
-* Follow platform design standards
-* Support common screen sizes
-
-## Deliverables
-
-* Source code
-* Demo video
-
----
-
-# Evaluation Criteria
-
-Submissions will be evaluated based on:
-
-* Functionality
-* Code quality
-* Project structure
-* Maintainability
-* Problem-solving approach
-* Attention to detail
-
-We look forward to reviewing your submission.
+```
+server/
+  index.js            Express app (API endpoints)
+  data/properties.js  Mock property data
+src/
+  pages/              Route pages (Home, Browse, PropertyDetail, ...)
+  components/         Layout, UI components, modals
+  context/            Wallet context
+  utils/              Types and mock data used by other pages
+```
